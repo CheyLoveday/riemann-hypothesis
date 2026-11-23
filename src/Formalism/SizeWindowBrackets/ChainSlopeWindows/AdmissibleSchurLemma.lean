@@ -440,6 +440,14 @@ theorem band_total : BandTotal := by
   have := Finset.sum_le_card_nsmul (Finset.range I) _ _ hterm
   rwa [Finset.card_range, nsmul_eq_mul] at this
 
+/--
+Bounds the contribution of primes above `X''`.
+
+The weight floor makes every summand with exponent `i ≥ 2` vanish, leaving
+only first powers for primes in `(X'', X'' * (1 + th))`. The interval count
+retains an endpoint allowance: even an interval of length less than one may
+contain a prime. This accounts for the `w'' * th` term in the bound.
+-/
 theorem high_bucket_bound : HighBucket := by
   intro a at_ w'' X'' th s I w hw'' hth0 hth1 hX ha hat0 hat hs hI hw
   simp only [askAt]
@@ -478,6 +486,7 @@ theorem high_bucket_bound : HighBucket := by
       · rw [if_neg h1]
         apply max_le _ le_rfl
         have hi2 : 2 ≤ i := by omega
+        -- Higher powers lie beyond the cutoff and contribute zero.
         have hpow : (p : ℝ) ^ 2 ≤ (p : ℝ) ^ i := pow_le_pow_right₀ (by linarith) hi2
         have hp2 : 2 * X'' ≤ (p : ℝ) ^ 2 := by nlinarith
         have hpi0 : (0 : ℝ) < (p : ℝ) ^ i := by positivity
@@ -505,6 +514,7 @@ theorem high_bucket_bound : HighBucket := by
     · simp
   refine (Finset.sum_le_sum hper).trans ?_
   rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul]
+  -- The endpoint allowance permits one prime even in an interval shorter than one.
   have hcard := interval_count X'' (X'' * (1 + th))
     (s.filter (fun p : ℕ => (p : ℝ) < X'' * (1 + th))) (by nlinarith) (by
       intro n hn
